@@ -12,17 +12,17 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Usuario} from '../models';
+import {Credenciales, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorClavesService} from '../services';
 
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
-    public usuarioRepository : UsuarioRepository,
+    public usuarioRepository: UsuarioRepository,
     @service(AdministradorClavesService)
     public servicioClaves: AdministradorClavesService,
-  ) {}
+  ) { }
 
   @post('/usuarios')
   @response(200, {
@@ -154,5 +154,42 @@ export class UsuarioController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.usuarioRepository.deleteById(id);
+  }
+
+  /*Metodos que de adiccionan*
+   *
+   *
+   */
+
+
+
+  @post('/reconocer-usuario')
+  @response(200, {
+    description: 'Reconocer los usuarios',
+    content: {'application/json': {schema: getModelSchemaRef(Credenciales)}},
+  })
+  async reconocerUsuario(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Credenciales, {
+            title: 'Identificar Usuario'
+          }),
+        },
+      },
+    })
+    credenciales: Credenciales,
+  ): Promise<Usuario | null> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        correo: credenciales.usuario,
+        clave: credenciales.clave
+      }
+    })
+    if (usuario) {
+      //Generar token y añadirlo a la respuesta
+    }
+    return usuario
+
   }
 }
