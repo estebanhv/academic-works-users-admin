@@ -12,7 +12,7 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Credenciales, Usuario} from '../models';
+import {CambioClave, Credenciales, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorClavesService} from '../services';
 
@@ -179,7 +179,7 @@ export class UsuarioController {
       },
     })
     credenciales: Credenciales,
-  ): Promise<Usuario | null> {
+  ): Promise<object | null> {
     let usuario = await this.usuarioRepository.findOne({
       where: {
         correo: credenciales.usuario,
@@ -192,4 +192,65 @@ export class UsuarioController {
     return usuario
 
   }
+
+
+
+
+
+
+  @post('/cambiar-clave')
+  @response(200, {
+    description: 'Reconocer los usuarios',
+    content: {'application/json': {schema: getModelSchemaRef(CambioClave)}},
+  })
+  async cambiarClave(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(CambioClave, {
+            title: 'Cambiar clave'
+          }),
+        },
+      },
+    })
+    credencialesClave: CambioClave,
+  ): Promise<Boolean> {
+    let respuesta = await this.servicioClaves.CambiarClave(credencialesClave)
+    if (respuesta) {
+      //Invocar al servicio de notificaciones para enviar correo al usuario
+
+    }
+
+
+    return respuesta
+
+  }
+
+
+@post('/recuperar-clave')
+  @response(200, {
+    description: 'Recuperar clave de los usuarios',
+    content: {'application/json': {schema: {}}},
+  })
+  async recuperarClave(
+    @requestBody({
+      content: {
+        'application/json': {
+        },
+      },
+    })
+    correo: string,
+  ): Promise<Usuario| null> {
+    let usuario = await this.servicioClaves.RecuperarClave(correo)
+    if (usuario) {
+      //Invocar al servicio de notificaciones para enviar correo al usuario
+
+    }
+
+
+    return usuario
+
+  }
+
+
 }
