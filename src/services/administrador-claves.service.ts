@@ -34,23 +34,7 @@ export class AdministradorClavesService {
     }
   }
 
-  async RecuperarClave(correo: string): Promise<Usuario | null> {
-    let usuario = await this.usuarioRepository.findOne({
-      where: {
 
-        correo: correo
-      }
-    })
-    if (usuario) {
-      let clave = this.CrearClaveAleatoria()
-      usuario.clave = this.CifrarTexto(clave)
-      await this.usuarioRepository.updateById(usuario._id, usuario);
-      usuario.clave=""
-      return usuario
-    } else {
-      return null
-    }
-  }
 
   CrearClaveAleatoria(): string {
 
