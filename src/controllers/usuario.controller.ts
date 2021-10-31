@@ -12,9 +12,10 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {CambioClave, Credenciales, Usuario} from '../models';
+import {Configuracion} from '../key/configuracion';
+import {CambioClave, NotificacionCorreo, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
-import {AdministradorClavesService} from '../services';
+import {AdministradorClavesService, NotificacionesService, SesionUsuariosService} from '../services';
 
 export class UsuarioController {
   constructor(
@@ -22,6 +23,10 @@ export class UsuarioController {
     public usuarioRepository: UsuarioRepository,
     @service(AdministradorClavesService)
     public servicioClaves: AdministradorClavesService,
+    @service(SesionUsuariosService)
+    private servicioSesionUsuario: SesionUsuariosService,
+    @service(NotificacionesService)
+    private notificacionesService: NotificacionesService
   ) { }
 
   @post('/usuarios')
@@ -50,6 +55,11 @@ export class UsuarioController {
 
     let usuarioListo = await this.usuarioRepository.create(usuario);
     if (usuarioListo) {
+      let datos = new NotificacionCorreo()
+      datos.destinatario= usuario.correo
+      datos.asunto= Configuracion.asuntoCreacionUsuario
+      datos.mensaje= `Hola ${usuario.nombre} <br/>${Configuracion.mensajeCreacionUsuario} ${clave}`
+      this.notificacionesService.EnviarCorreo(datos)
       //Enviar clave por correo electronico
     }
     return usuarioListo
@@ -162,7 +172,7 @@ export class UsuarioController {
    */
 
 
-
+/*
   @post('/reconocer-usuario')
   @response(200, {
     description: 'Reconocer los usuarios',
@@ -180,19 +190,16 @@ export class UsuarioController {
     })
     credenciales: Credenciales,
   ): Promise<object | null> {
-    let usuario = await this.usuarioRepository.findOne({
-      where: {
-        correo: credenciales.usuario,
-        clave: credenciales.clave
-      }
-    })
+    let usuario= await this.servicioSesionUsuario.IdentificarUsuario(credenciales)
+
     if (usuario) {
+      usuario.clave=""
       //Generar token y añadirlo a la respuesta
     }
     return usuario
 
   }
-
+*/
 
 
 
@@ -215,14 +222,19 @@ export class UsuarioController {
     })
     credencialesClave: CambioClave,
   ): Promise<Boolean> {
-    let respuesta = await this.servicioClaves.CambiarClave(credencialesClave)
-    if (respuesta) {
+    let usuario = await this.servicioClaves.CambiarClave(credencialesClave)
+    if (usuario) {
+      let datos = new NotificacionCorreo()
+      datos.destinatario= usuario.correo
+      datos.asunto= Configuracion.asuntoCambioClave
+      datos.mensaje= `Hola ${usuario.nombre} <br/>${Configuracion.mensajeCambioClave}`
+      this.notificacionesService.EnviarCorreo(datos)
       //Invocar al servicio de notificaciones para enviar correo al usuario
 
     }
 
 
-    return respuesta
+    return usuario !=null
 
   }
 

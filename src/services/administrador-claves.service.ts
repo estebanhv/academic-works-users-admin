@@ -17,7 +17,7 @@ export class AdministradorClavesService {
    */
 
 
- async CambiarClave(credencialesClave: CambioClave): Promise<boolean> {
+ async CambiarClave(credencialesClave: CambioClave): Promise<Usuario|null> {
     let usuario = await this.usuarioRepository.findOne({
       where: {
         _id: credencialesClave.id_usuario,
@@ -28,9 +28,9 @@ export class AdministradorClavesService {
       usuario.clave = credencialesClave.nueva_clave
       await this.usuarioRepository.updateById(credencialesClave.id_usuario, usuario);
       //Generar token y añadirlo a la respuesta
-      return true
+      return usuario
     } else {
-      return false
+      return null
     }
   }
 
@@ -51,13 +51,6 @@ export class AdministradorClavesService {
       return null
     }
   }
-
-
-
-
-
-
-
 
   CrearClaveAleatoria(): string {
 

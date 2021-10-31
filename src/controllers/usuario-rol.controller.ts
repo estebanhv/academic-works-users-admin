@@ -14,6 +14,7 @@ export class UsuarioRolController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository: UsuarioRepository,
+
   ) { }
 
   @get('/usuarios/{id}/rol', {
