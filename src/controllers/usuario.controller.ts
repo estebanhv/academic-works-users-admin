@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -13,12 +14,12 @@ import {
   response
 } from '@loopback/rest';
 import {Configuracion} from '../key/configuracion';
-import {CambioClave, NotificacionCorreo, Usuario} from '../models';
+import {CambioClave, Credenciales, NotificacionCorreo, Usuario} from '../models';
 import {CredencialesRecuperarClave} from '../models/credenciales-recuperar-clave.model';
 import {NotificacionSms} from '../models/notificacion-sms.model';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorClavesService, NotificacionesService, SesionUsuariosService} from '../services';
-
+@authenticate("admin")
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
@@ -174,7 +175,7 @@ export class UsuarioController {
    */
 
 
-  /*
+    @authenticate.skip()
     @post('/reconocer-usuario')
     @response(200, {
       description: 'Reconocer los usuarios',
@@ -193,15 +194,19 @@ export class UsuarioController {
       credenciales: Credenciales,
     ): Promise<object | null> {
       let usuario= await this.servicioSesionUsuario.IdentificarUsuario(credenciales)
-
+      let tk=""
       if (usuario) {
         usuario.clave=""
+         tk = await this.servicioSesionUsuario.GenerarToken(usuario)
         //Generar token y añadirlo a la respuesta
+
+      }return {
+        token: tk,
+        usuario:usuario
       }
-      return usuario
 
     }
-  */
+
 
 
 
@@ -240,7 +245,7 @@ export class UsuarioController {
 
   }
 
-
+  @authenticate.skip()
   @post('/recuperar-clave')
   @response(200, {
     description: 'Recuperar clave de los usuarios',

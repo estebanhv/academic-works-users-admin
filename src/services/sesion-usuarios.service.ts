@@ -1,8 +1,9 @@
 import { /* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {Credenciales} from '../models';
+import {Configuracion} from '../key/configuracion';
+import {Credenciales, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
-//const fetch = require('node-fetch');
+const fetch = require('node-fetch');
 @injectable({scope: BindingScope.TRANSIENT})
 export class SesionUsuariosService {
   constructor(@repository(UsuarioRepository)
@@ -22,7 +23,7 @@ export class SesionUsuariosService {
     return usuario
   }
 
- /* async GenerarToken(datos: Usuario): Promise<string> {
+  async GenerarToken(datos: Usuario): Promise<string> {
     let url = `${Configuracion.url_crear_token}?${Configuracion.arg_nombre}=${datos.nombre}&${Configuracion.arg_id_persona}=${datos._id}&${Configuracion.arg_rol}=${datos.id_rol}`;
     let token = "";
     await fetch(url)
@@ -31,5 +32,5 @@ export class SesionUsuariosService {
       })
     return token;
 
-    }*/
+    }
 }
