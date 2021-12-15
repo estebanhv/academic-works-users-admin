@@ -10,7 +10,7 @@ import {
 } from '@loopback/repository';
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
 import {Configuracion} from '../key/configuracion';
@@ -19,7 +19,7 @@ import {CredencialesRecuperarClave} from '../models/credenciales-recuperar-clave
 import {NotificacionSms} from '../models/notificacion-sms.model';
 import {UsuarioRepository} from '../repositories';
 import {AdministradorClavesService, NotificacionesService, SesionUsuariosService} from '../services';
-@authenticate("admin")
+
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
@@ -199,11 +199,12 @@ export class UsuarioController {
         usuario.clave=""
          tk = await this.servicioSesionUsuario.GenerarToken(usuario)
         //Generar token y añadirlo a la respuesta
+        return {
+          token: tk,
+          usuario:usuario
+        }
+      }throw new HttpErrors[400]("Datos invalidos");
 
-      }return {
-        token: tk,
-        usuario:usuario
-      }
 
     }
 
@@ -237,15 +238,15 @@ export class UsuarioController {
       datos.mensaje = `Hola ${usuario.nombre} <br/>${Configuracion.mensajeCambioClave}`
       this.notificacionesService.EnviarCorreo(datos)
       //Invocar al servicio de notificaciones para enviar correo al usuario
-
+      return usuario != null
     }
 
+    throw new HttpErrors[400]("Datos invalidos");
 
-    return usuario != null
 
   }
 
-  @authenticate.skip()
+
   @post('/recuperar-clave')
   @response(200, {
     description: 'Recuperar clave de los usuarios',
@@ -279,10 +280,12 @@ export class UsuarioController {
 
 
       this.notificacionesService.EnviarSms(datos)
+      return usuario
     }
 
 
-    return usuario
+    throw new HttpErrors[400]("Datos invalidos");
+
 
   }
 

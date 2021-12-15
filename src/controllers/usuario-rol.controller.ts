@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   repository
 } from '@loopback/repository';
@@ -9,7 +10,7 @@ import {
   Rol, Usuario
 } from '../models';
 import {UsuarioRepository} from '../repositories';
-
+@authenticate("admin")
 export class UsuarioRolController {
   constructor(
     @repository(UsuarioRepository)
